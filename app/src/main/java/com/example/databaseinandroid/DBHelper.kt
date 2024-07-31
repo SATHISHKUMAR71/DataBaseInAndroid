@@ -7,15 +7,27 @@ import android.database.sqlite.SQLiteOpenHelper
 
 class DBHelper(context: Context): SQLiteOpenHelper(context, DB_NAME,null, DB_VERSION){
     companion object{
-        private val DB_NAME = "notes_app.db"
-        private val DB_VERSION = 1
-        private val TABLE_NAME = "notes_app"
-        private val COLUMN_ID = "id"
-        private val COLUMN_TITLE = "title"
-        private val COLUMN_CONTENT = "content"
-        private val COLUMN_CREATED_AT = "created_at"
-        private val COLUMN_UPDATED_AT = "updated_at"
-        private val COLUMN_IS_PINNED = "is_pinned"
+        private const val  DB_NAME = "notes_app.db"
+        private const val DB_VERSION = 1
+        private const val TABLE_NAME = "notes_app"
+        private const val COLUMN_ID = "id"
+        private const val COLUMN_TITLE = "title"
+        private const val COLUMN_CONTENT = "content"
+        private const val COLUMN_CREATED_AT = "created_at"
+        private const val COLUMN_UPDATED_AT = "updated_at"
+        private const val COLUMN_IS_PINNED = "is_pinned"
+    }
+
+    override fun onCreate(db: SQLiteDatabase?) {
+        val createTable = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY, $COLUMN_TITLE " +
+                "TEXT, $COLUMN_CONTENT TEXT, $COLUMN_CREATED_AT TEXT, $COLUMN_UPDATED_AT TEXT, $COLUMN_IS_PINNED INTEGER DEFAULT 0)"
+        db?.execSQL(createTable)
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {
+        val dropQuery = "DROP TABLE IF EXISTS $TABLE_NAME"
+        db?.execSQL(dropQuery)
+        onCreate(db)
     }
 
     fun insert(note:Notes){
@@ -31,16 +43,24 @@ class DBHelper(context: Context): SQLiteOpenHelper(context, DB_NAME,null, DB_VER
         db.close()
     }
 
-    override fun onCreate(db: SQLiteDatabase?) {
-        val createTable = "CREATE TABLE $TABLE_NAME ($COLUMN_ID INTEGER PRIMARY KEY, $COLUMN_TITLE " +
-                "TEXT, $COLUMN_CONTENT TEXT, $COLUMN_CREATED_AT TEXT, $COLUMN_UPDATED_AT TEXT, $COLUMN_IS_PINNED INTEGER DEFAULT 0)"
-        db?.execSQL(createTable)
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase?, p1: Int, p2: Int) {
-        val dropQuery = "DROP TABLE IF EXISTS $TABLE_NAME"
-        db?.execSQL(dropQuery)
-        onCreate(db)
+    fun readAllNotes():MutableList<Notes>{
+        val db = readableDatabase
+        val notesList = mutableListOf<Notes>()
+        val query = "SELECT * FROM $TABLE_NAME"
+        val cursor = db.rawQuery(query,null)
+        while (cursor.moveToNext()){
+            notesList.add(
+                Notes(
+                    title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
+                    content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)),
+                    isPinned = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_PINNED)),
+                    createdAt = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)),
+                    updatedAt = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UPDATED_AT))
+                )
+            )
+        }
+        cursor.close()
+        return notesList
     }
 
 }
