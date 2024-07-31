@@ -19,6 +19,7 @@ import java.util.Date
 
 class AddNote : Fragment() {
     private lateinit var notesDB:DBHelper
+    private var noteId=0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         notesDB = DBHelper(requireContext())
@@ -35,17 +36,25 @@ class AddNote : Fragment() {
         val content = view.findViewById<EditText>(R.id.content)
         val date = view.findViewById<TextView>(R.id.date)
         date.text = LocalDate.now().toString()
-        arguments?.let {
-            title.setText(it.getString("title"))
-            content.setText(it.getString("content"))
-            date.setText(it.getString("date"))
+        if(arguments!=null){
+            arguments?.let {
+                title.setText(it.getString("title"))
+                content.setText(it.getString("content"))
+                date.text = (it.getString("date"))
+                noteId = it.getInt("id")
+            }
         }
         view.findViewById<ImageButton>(R.id.backNavigator).setOnClickListener {
             parentFragmentManager.popBackStack()
         }
         view.findViewById<ImageButton>(R.id.save).setOnClickListener {
-            notesDB.insert(Notes(title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0))
-            println((Notes(title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)).toString())
+            if(arguments==null){
+                notesDB.insert(Notes(0,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0))
+            }
+            else{
+                notesDB.update(Notes(noteId,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0))
+            }
+            println((Notes(0,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)).toString())
             parentFragmentManager.popBackStack()
         }
 

@@ -55,7 +55,8 @@ class DBHelper(context: Context): SQLiteOpenHelper(context, DB_NAME,null, DB_VER
                     content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT)),
                     isPinned = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_PINNED)),
                     createdAt = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CREATED_AT)),
-                    updatedAt = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UPDATED_AT))
+                    updatedAt = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_UPDATED_AT)),
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
                 )
             )
         }
@@ -63,4 +64,18 @@ class DBHelper(context: Context): SQLiteOpenHelper(context, DB_NAME,null, DB_VER
         return notesList
     }
 
+    fun update(note:Notes){
+        val db = writableDatabase
+        val contentValues = ContentValues().apply {
+            put(COLUMN_TITLE,note.title)
+            put(COLUMN_CONTENT,note.content)
+            put(COLUMN_CREATED_AT,note.createdAt)
+            put(COLUMN_IS_PINNED,note.isPinned)
+            put(COLUMN_UPDATED_AT,note.updatedAt)
+        }
+        val whereClause = "$COLUMN_ID = ?"
+        val selectionArgs = arrayOf(note.id.toString())
+        println("db status: ${ db.update(TABLE_NAME,contentValues,whereClause,selectionArgs)}")
+        db.close()
+    }
 }

@@ -28,6 +28,7 @@ class NotesAdapter(private var notesList: MutableList<Notes>,private var activit
             this.setOnClickListener {
                 val addNoteFragment = AddNote()
                 addNoteFragment.arguments = Bundle().apply {
+                    putInt("id",notesList[position].id)
                     putString("title",notesList[position].title)
                     putString("date",notesList[position].createdAt)
                     putString("content",notesList[position].content)
