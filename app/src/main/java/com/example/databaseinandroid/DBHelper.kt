@@ -75,7 +75,15 @@ class DBHelper(context: Context): SQLiteOpenHelper(context, DB_NAME,null, DB_VER
         }
         val whereClause = "$COLUMN_ID = ?"
         val selectionArgs = arrayOf(note.id.toString())
-        println("db status: ${ db.update(TABLE_NAME,contentValues,whereClause,selectionArgs)}")
+        db.update(TABLE_NAME,contentValues,whereClause,selectionArgs)
+        db.close()
+    }
+
+    fun delete(note:Notes){
+        val db = writableDatabase
+        val whereClause = "$COLUMN_ID = ?"
+        val whereArgs = arrayOf(note.id.toString())
+        db.delete(TABLE_NAME,whereClause,whereArgs)
         db.close()
     }
 }

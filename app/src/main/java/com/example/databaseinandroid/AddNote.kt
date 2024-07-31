@@ -3,6 +3,7 @@ package com.example.databaseinandroid
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.provider.ContactsContract.CommonDataKinds.Im
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.time.LocalDate
@@ -20,6 +22,7 @@ import java.util.Date
 class AddNote : Fragment() {
     private lateinit var notesDB:DBHelper
     private var noteId=0
+    private lateinit var note:Notes
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         notesDB = DBHelper(requireContext())
@@ -42,6 +45,7 @@ class AddNote : Fragment() {
                 content.setText(it.getString("content"))
                 date.text = (it.getString("date"))
                 noteId = it.getInt("id")
+                note = Notes(noteId,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)
             }
         }
         view.findViewById<ImageButton>(R.id.backNavigator).setOnClickListener {
@@ -49,13 +53,19 @@ class AddNote : Fragment() {
         }
         view.findViewById<ImageButton>(R.id.save).setOnClickListener {
             if(arguments==null){
-                notesDB.insert(Notes(0,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0))
+                note = Notes(0,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)
+                notesDB.insert(note)
             }
             else{
-                notesDB.update(Notes(noteId,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0))
+                notesDB.update(note)
             }
             println((Notes(0,title.text.toString(),content.text.toString(),LocalDate.now().toString(),LocalDate.now().toString(),0)).toString())
             parentFragmentManager.popBackStack()
+        }
+        view.findViewById<ImageButton>(R.id.deleteNote).setOnClickListener {
+            notesDB.delete(note)
+            parentFragmentManager.popBackStack()
+            Toast.makeText(context,"Notes Deleted Successfully",Toast.LENGTH_SHORT).show()
         }
 
         return view
